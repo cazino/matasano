@@ -15,8 +15,7 @@ setup(name='matasano',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      
-      test_suite="",
+      test_suite="matasano.tests",
       entry_points="""\
       """,
       )

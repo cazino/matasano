@@ -1,4 +1,5 @@
 import base64
+import binascii
 
 
 def hextobase64(hex_str):
@@ -7,5 +8,15 @@ def hextobase64(hex_str):
 
 
 def xor(hex1, hex2):
-    result = int(hex1, 16) ^ int(hex2, 16)
-    return '{:x}'.format(result)
+    b1 = bytes.fromhex(hex1)
+    b2 = bytes.fromhex(hex2)
+    result = bytearray()
+    iterb2 = iter(b2)
+    for elem1 in b1:
+        try:
+            elem2 = next(iterb2)
+        except StopIteration:
+            iterb2 = iter(b2)
+            elem2 = next(iterb2)
+        result.append(elem1 ^ elem2)
+    return binascii.hexlify(result).decode()

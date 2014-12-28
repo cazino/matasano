@@ -19,3 +19,10 @@ class Xor(unittest.TestCase):
         hex2 = '686974207468652062756c6c277320657965'
         result = '746865206b696420646f6e277420706c6179'
         self.assertEquals(result, xor(hex1, hex2))
+
+    def test_shortest(self):
+        from matasano import xor
+        hex1 = '0000'  # 00000000
+        hex2 = 'ff'    # 1111
+        result = 'ffff'  # 11111111
+        self.assertEquals(result, xor(hex1, hex2))
