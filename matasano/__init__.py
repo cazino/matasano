@@ -1,7 +1,5 @@
 import base64
-import binascii
 from collections import defaultdict
-import difflib
 import operator
 import string
 
@@ -11,37 +9,46 @@ def hextobase64(hex_str):
     return base64.b64encode(bytes_data).decode()
 
 
-def xor(hex1, hex2):
-    b1 = bytes.fromhex(hex1)
-    b2 = bytes.fromhex(hex2)
+def xor(bytes1, bytes2):
     result = bytearray()
-    iterb2 = iter(b2)
-    for elem1 in b1:
+    iterb2 = iter(bytes2)
+    for elem1 in bytes1:
         try:
             elem2 = next(iterb2)
         except StopIteration:
-            iterb2 = iter(b2)
+            iterb2 = iter(bytes2)
             elem2 = next(iterb2)
         result.append(elem1 ^ elem2)
-    return binascii.hexlify(result).decode()
+    return result
 
 
 def score(text):
     """Scores plain english text  with
     "ETAOIN SHRDLU" occurences
     """
-
+    text = text.upper()
     ref = "ETAOINSHRDLU"
-    exclude = " "
     occurences = defaultdict(int)
     for char in text:
-        if char not in exclude:
+        if char in string.ascii_uppercase:
             occurences[char] += 1
     sorted_occ = sorted(occurences.items(),
                         key=operator.itemgetter(1),
                         reverse=True)
-    sorted_char = [x.capitalize() for (x, y) in sorted_occ]
-    return difflib.SequenceMatcher(a=ref, b=sorted_char).ratio()
+    sorted_char = [x for (x, y) in sorted_occ
+                   if x in string.ascii_uppercase + " "]
+    distance = 0
+    restricted_sorted_char = sorted_char[:12]
+    for char in restricted_sorted_char:
+        try:
+            tmp_dist = abs(restricted_sorted_char.index(char) -
+                           ref.index(char))
+        except ValueError:
+            tmp_dist = 12
+        distance += tmp_dist
+    if restricted_sorted_char:
+        return distance / (12 * len(restricted_sorted_char))
+    return 1
 
 
 def decrypt(hexphrase):
@@ -49,13 +56,16 @@ def decrypt(hexphrase):
     hex is supposed to have been xor with a single character.
     Return the most likely unencoded original string
     """
+    bytes_phrase = bytes.fromhex(hexphrase)
     results = defaultdict(float)
     for char in string.printable:
         char_bytes = bytes(char, 'ascii')
-        phrase = xor(hexphrase, binascii.hexlify(char_bytes).decode())\
-            .decode()
+        xored = xor(bytes_phrase, char_bytes)
+
+        phrase = xored.decode().capitalize()
         results[phrase] = score(phrase)
     sorted_results = sorted(results.items(),
-                            key=operator.itemgetter(1),
-                            reverse=True)
+                            key=operator.itemgetter(1))
+    import ipdb
+    ipdb.set_trace()
     return sorted_results[0][0]

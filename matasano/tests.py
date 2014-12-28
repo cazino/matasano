@@ -1,3 +1,4 @@
+import binascii
 import unittest
 
 
@@ -19,15 +20,19 @@ class Xor(unittest.TestCase):
         from matasano import xor
         hex1 = '1c0111001f010100061a024b53535009181c'
         hex2 = '686974207468652062756c6c277320657965'
-        result = '746865206b696420646f6e277420706c6179'
-        self.assertEquals(result, xor(hex1, hex2))
+        expected_hex = '746865206b696420646f6e277420706c6179'
+        result = binascii.b2a_hex(xor(bytes.fromhex(hex1),
+                                      bytes.fromhex(hex2))).decode()
+        self.assertEquals(expected_hex, result)
 
     def test_shortest(self):
         from matasano import xor
         hex1 = '0000'  # 00000000
         hex2 = 'ff'    # 1111
-        result = 'ffff'  # 11111111
-        self.assertEquals(result, xor(hex1, hex2))
+        result = bytes.fromhex('ffff')  # 11111111
+        self.assertEquals(result,
+                          xor(bytes.fromhex(hex1),
+                              bytes.fromhex(hex2)))
 
 
 class ScoreTest(unittest.TestCase):
@@ -37,9 +42,15 @@ class ScoreTest(unittest.TestCase):
         text = ('EEEEEEEEEEEEETTTTTTTTTTTT'
                 'AAAAAAAAAAAOOOOOOOOOOIIIIIIIII'
                 'NNNNNNNNSSSSSSSHHHHHHRRRRRDDDDLLUU')
-        self.assertEquals(1, score(text))
+        self.assertEquals(0, score(text))
 
     def test_null_score(self):
         from matasano import score
         text = 'x'
-        self.assertEquals(0, score(text))
+        self.assertEquals(1, score(text))
+
+    def test_real_data(self):
+        from matasano import score
+        score1 = score("Cooking mc's like a pound of bacon")
+        score2 = score('Occgebk,ao+\x7f,`egi,m,|cybh,cj,nmocb')
+        self.assertLess(score1, score2)
