@@ -3,8 +3,6 @@ from collections import defaultdict
 import operator
 import string
 
-from matasano.language import EnglishScorer
-
 
 def hextobase64(hex_str):
     bytes_data = bytes.fromhex(hex_str)
@@ -24,6 +22,24 @@ def xor(bytes1, bytes2):
     return result
 
 
+def score(text, upperize=True):
+    """Scores a text so that
+    an english text get a high score.
+    A text in another language or in a non langugage
+    should get a lower score.
+    """
+    char_score = {' ': 13, 'E': 12, 'T': 11, 'A': 11, 'O': 10, 'I': 9,
+                  'N': 8, 'S': 7, 'H': 6, 'R': 5, 'D': 7, 'L': 6,
+                  'U': 5}
+    if upperize:
+        text = text.upper()
+    scores = defaultdict(int)
+    for char in text:
+        if char in char_score:
+            scores[char] += char_score[char]
+    return sum(scores.values()) / (12 * len(text))
+
+
 def decrypt(hexphrase):
         """ hex is hex encoded string
         hex is supposed to have been xor with a single character.
@@ -35,7 +51,8 @@ def decrypt(hexphrase):
             char_bytes = bytes(char, 'ascii')
             xored = xor(bytes_phrase, char_bytes)
             phrase = xored.decode()  # .capitalize()
-            results[phrase] = EnglishScorer().score(phrase)
+            results[phrase] = score(phrase)
         sorted_results = sorted(results.items(),
-                                key=operator.itemgetter(1))
+                                key=operator.itemgetter(1),
+                                reverse=True)
         return sorted_results[0][0]
