@@ -40,7 +40,7 @@ def score(text, upperize=True):
     return sum(scores.values()) / (12 * len(text))
 
 
-def decrypt(hexphrase):
+def decrypt_with_printable(hexphrase, encoding='utf-8'):
         """ hex is hex encoded string
         hex is supposed to have been xor with a single character.
         Return the most likely unencoded original string
@@ -48,11 +48,25 @@ def decrypt(hexphrase):
         bytes_phrase = bytes.fromhex(hexphrase)
         results = defaultdict(float)
         for char in string.printable:
-            char_bytes = bytes(char, 'ascii')
+            char_bytes = bytes(char, encoding)
             xored = xor(bytes_phrase, char_bytes)
-            phrase = xored.decode()  # .capitalize()
+            phrase = xored.decode(encoding)
             results[phrase] = score(phrase)
         sorted_results = sorted(results.items(),
                                 key=operator.itemgetter(1),
                                 reverse=True)
         return sorted_results
+
+
+def find_encrypted(filepath, encoding='utf-8'):
+    results = list()
+    with open(filepath, 'r') as f:
+        for line in f:
+            line = line.strip()
+            tmp_results = [(line, decrypted, score)
+                           for (decrypted, score)
+                           in decrypt_with_printable(line, encoding)]
+            results.extend(tmp_results)
+    return sorted(results,
+                  key=operator.itemgetter(2),
+                  reverse=True)
