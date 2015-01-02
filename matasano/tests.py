@@ -84,4 +84,4 @@ class DecryptTest(unittest.TestCase):
                  '2b783431333d7839782837'
                  '2d363c78373e783a393b3736')
         self.assertEquals("Cooking MC's like a pound of bacon",
-                          decrypt(xored))
+                          decrypt(xored)[0][0])

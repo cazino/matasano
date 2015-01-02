@@ -55,4 +55,4 @@ def decrypt(hexphrase):
         sorted_results = sorted(results.items(),
                                 key=operator.itemgetter(1),
                                 reverse=True)
-        return sorted_results[0][0]
+        return sorted_results
