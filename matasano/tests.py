@@ -114,3 +114,14 @@ class FindEncryptedTest(unittest.TestCase):
         results = find_encrypted(test_file, 'latin-1')
         self.assertEqual('Now that the party is jumping\n',
                          results[0][1])
+
+
+class HammingTest(unittest.TestCase):
+
+    def test(self):
+        from matasano import hamming
+        str1 = "this is a test"
+        str2 = "wokka wokka!!!"
+        self.assertEqual(
+            37,
+            hamming(str1.encode('utf-32'), str2.encode('utf-32')))

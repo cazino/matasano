@@ -70,3 +70,19 @@ def find_encrypted(filepath, encoding='utf-8'):
     return sorted(results,
                   key=operator.itemgetter(2),
                   reverse=True)
+
+
+def encrypt_file(filepath, cryptkey):
+    cryptkey_bytes = cryptkey.encode()
+    with open(filepath, 'rb') as f:
+        bytes_from_file = f.read()
+        crypted_bytes = xor(bytes_from_file, cryptkey_bytes)
+        return crypted_bytes
+
+
+def hamming(bytes1, bytes2):
+    assert len(bytes1) == len(bytes2)
+    result = 0
+    for b1, b2 in zip(bytes1, bytes2):
+        result += bin(b1 ^ b2).count('1')
+    return result
